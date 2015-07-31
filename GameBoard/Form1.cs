@@ -19,7 +19,11 @@ namespace GameBoard
 
         private void Form1_Shown(object sender, EventArgs e)
         {
-            runner = new GameRunner(this) { Dispatcher = Dispatcher.CurrentDispatcher };
+            runner = new GameRunner(this)
+            {
+                Dispatcher = Dispatcher.CurrentDispatcher,
+                ShowFPS = true
+            };
             runner.Run();
         }
 
