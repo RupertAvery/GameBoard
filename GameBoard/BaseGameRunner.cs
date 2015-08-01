@@ -16,7 +16,7 @@ namespace GameBoard
 
     public abstract class BaseGameRunner : IDisposable
     {
-        private bool running;
+        protected bool running;
         private Control container;
         private Thread worker;
         private int fps = 0;
@@ -24,14 +24,13 @@ namespace GameBoard
         private Bitmap canvas;
         private Stopwatch s = new Stopwatch();
         private Bitmap titleBitmap;
-
         protected int CanvasWidth;
         protected int CanvasHeight;
 
         public bool ShowFPS { get; set; }
         public Dispatcher Dispatcher { get; set; }
         protected KeyState[] keyState;
-
+        private Font debugfont ;
         protected BaseGameRunner(Control container)
         {
             this.container = container;
@@ -39,6 +38,7 @@ namespace GameBoard
             container.KeyUp += ContainerOnKeyUp;
 
             keyState = new KeyState[256];
+            debugfont = new Font(new FontFamily("Consolas"), 12, FontStyle.Regular);
 
             var size = container.ClientSize;
 
@@ -55,6 +55,10 @@ namespace GameBoard
         {
             if (disposing)
             {
+                if (debugfont != null)
+                {
+                    debugfont.Dispose();
+                }
                 if (canvas != null)
                 {
                     canvas.Dispose();
@@ -101,7 +105,7 @@ namespace GameBoard
 
         public void Run()
         {
-            worker = new Thread(GameLoop);
+            worker = new Thread(MainLoop);
             worker.Start();
         }
 
@@ -134,36 +138,56 @@ namespace GameBoard
             return keyState[(int)key] == KeyState.KeyDown;
         }
 
-        protected void GameLoop()
+
+        protected bool KeyIsUp(Keys key)
+        {
+            return keyState[(int)key] == KeyState.KeyUp;
+        }
+
+        protected void Pause(int milliseconds)
+        {
+            s.Reset();
+            s.Start();
+            while (s.ElapsedMilliseconds < milliseconds)
+            {
+                Thread.Sleep(10);
+            }            
+        }
+
+        protected virtual void MainLoop()
         {
             // This is our main game loop. Everything that happens should pass through here
             // To add additional game states, you might want to override this to provide additional logic
             Initialize();
 
             // Fade in the the image
-            for (float i = 0; i <= 1.0f; i += 0.005f)
+            for (float i = 0; i <= 1.0f; i += 0.025f)
             {
                 ShowTitle(i);
             }
 
-            s.Reset();
-            s.Start();
-            while (s.ElapsedMilliseconds < 2000)
+            Pause(2000);
+
+            // Fade in the the image
+            for (float i = 0; i <= 1.0f; i += 0.025f)
             {
-                Thread.Sleep(10);
+                ShowTitle(1.0f - i);
             }
 
-            s.Reset();
-            s.Start();
+            GameLoop();
+
+            Cleanup();
+        }
+
+        protected virtual void GameLoop()
+        {
             while (running)
             {
                 ProcessInputs();
                 UpdateObjects();
                 Draw();
             }
-            Cleanup();
         }
-
 
         protected virtual void UpdateObjects()
         {
@@ -175,14 +199,14 @@ namespace GameBoard
             // override this in your subclass
         }
 
-        private void Draw()
+        protected void Draw()
         {
             using (var g = Graphics.FromImage(canvas))
             {
                 g.Clear(Color.Black);
                 if (ShowFPS)
                 {
-                    g.DrawString(string.Format("{0}", fps), new Font(new FontFamily("Consolas"), 12, FontStyle.Regular), Brushes.White, 0, 0);
+                    g.DrawString(string.Format("{0}", fps), debugfont, Brushes.White, 0, 0);
                 }
 
                 DrawObjects(g);

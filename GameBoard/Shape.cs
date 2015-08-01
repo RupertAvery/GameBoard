@@ -2,15 +2,17 @@ namespace GameBoard
 {
     public abstract class Shape
     {
-        public int Left { get; set; }
-        public int Top { get; set; }
-        public int SpeedX { get; set; }
-        public int SpeedY { get; set; }
-        public int Width { get; set; }
-        public int Height { get; set; }
+        public float Left { get; set; }
+        public float Top { get; set; }
+        public float SpeedX { get; set; }
+        public float SpeedY { get; set; }
+        public float Width { get; set; }
+        public float Height { get; set; }
+        public float VelocityX { get; set; }
+        public float VelocityY { get; set; }
 
-        public int Right { get { return Left + Width; } }
-        public int Bottom { get { return Top + Height; } }
+        public float Right { get { return Left + Width; } }
+        public float Bottom { get { return Top + Height; } }
 
         public bool OutsideBoundsX(int left, int right)
         {

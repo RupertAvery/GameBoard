@@ -8,7 +8,7 @@ namespace GameBoard
         public Paddle()
         {
             Width = 20;
-            Height = 200;
+            Height = 160;
         }
 
         public void Draw(Graphics g)
@@ -16,5 +16,14 @@ namespace GameBoard
             g.FillRectangle(Brushes.White, Left, Top, Width, Height);
         }
 
+        public void MoveX()
+        {
+            Left += SpeedX;
+        }
+
+        public void MoveY()
+        {
+            Top += SpeedY;
+        }
     }
 }
